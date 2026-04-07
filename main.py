@@ -2,6 +2,7 @@ from __future__ import division
 import random
 from globals import *
 from galaxy import Galaxy
+from tracker import StarTracker
 import numpy as np
 
 
@@ -33,6 +34,11 @@ def find_galaxy_centroid(stars, sample_radius_scene=5.0):
 
     return vector(centroid[0], centroid[1], centroid[2]), len(cluster_positions), next_radius
 
+def calc_ejection_rate(total_stars, stars_in_cluster):
+    #return % of stars ejected in collision
+    if total_stars == 0:
+        return 0
+    return (total_stars - stars_in_cluster) / total_stars * 100.0
 
 def main():
     scene.objects.clear()
@@ -42,7 +48,7 @@ def main():
     
     milky_way = Galaxy(
         num_stars=NUM_STARS_MILKY_WAY,
-        pos=vector(-5, 0, 0) * DIST_SCALE,
+        pos=vector(-9, 0, 0) * DIST_SCALE,
         vel=vector(0, 0, 0),
         radius=MAX_ORBITAL_RADIUS,
         thickness=MILKY_WAY_GALAXY_THICKNESS,
@@ -51,12 +57,24 @@ def main():
     )
     andromeda = Galaxy(
         num_stars=NUM_STARS_ANDROMEDA,
-        pos=vector(3, 0, 0) * DIST_SCALE,
+        pos=vector(6, 0, 0) * DIST_SCALE,
         vel=vector(0, 3, 0),
         radius=MAX_ORBITAL_RADIUS,
         thickness=ANDROMEDA_GALAXY_THICKNESS,
         color=vector(0, 0.5, 1),
         rng=rng
+    )
+
+    galaxies_to_track = []
+    if TRACK_EARTH_IN_MILKY_WAY:
+        galaxies_to_track.append(milky_way)
+    if TRACK_EARTH_IN_ANDROMEDA:
+        galaxies_to_track.append(andromeda)
+
+    tracker = StarTracker(
+        galaxies=galaxies_to_track,
+        earth_radius=EARTH_ORBITAL_RADIUS,
+        earth_band=EARTH_ORBITAL_BAND
     )
 
     collision_happened = False
@@ -72,22 +90,29 @@ def main():
     while True:
         rate(100)
 
-        if not collision_happened and andromeda.pos.mag < 1.1920057081525512e+20:
+        galaxy_separation = (andromeda.pos - milky_way.pos).mag
+        if not collision_happened and galaxy_separation < COLLISION_THRESHOLD:
             collision_happened = True
+
+            for star in milky_way.stars:
+                if not star.is_earth_analog:
+                    star.obj.color = vector(1, 0.5, 0)
+                star.is_merged = True
+            for star in andromeda.stars:
+                if not star.is_earth_analog:
+                    star.obj.color = vector(1, 0.5, 0)
+                star.is_merged = True
+
 
         for star in milky_way.stars:
             star.vel += accel(star, andromeda) * dt
             star.vel += accel(star, milky_way) * dt
             star.pos += star.vel * dt
-            if andromeda.pos.mag < 1.1920057081525512e+20:
-                star.obj.color = vector(1, 0.5, 0)
 
         for star in andromeda.stars:
             star.vel += accel(star, milky_way) * dt
             star.vel += accel(star, andromeda) * dt
             star.pos += star.vel * dt
-            if andromeda.pos.mag < 1.1920057081525512e+20:
-                star.obj.color = vector(1, 0.5, 0)
 
         milky_way.vel += accel(milky_way, andromeda) * dt
         milky_way.pos += milky_way.vel * dt
@@ -99,15 +124,27 @@ def main():
 
             if track_step % TRACK_INTERVAL == 0:
                 merged = [s for s in milky_way.stars
-                          if s.obj.color == vector(1, 0.5, 0)]
+                          if s.is_merged]
                 merged += [s for s in andromeda.stars
-                           if s.obj.color == vector(1, 0.5, 0)]
+                           if s.is_merged]
 
-                centroid, _, cluster_radius = find_galaxy_centroid(
+                centroid, cluster_count, cluster_radius = find_galaxy_centroid(
                     merged, sample_radius_scene=cluster_radius
                 )
                 if centroid is not None:
                     target_center = centroid
+
+                #logs 
+                ejection_percent = calc_ejection_rate(len(merged), cluster_count)
+
+                if TURN_ON_LOGS:
+                    ejected = len(merged) - cluster_count
+                    print(f"[step {track_step:>6}] "
+                          f"cluster: {cluster_count:>4} stars | "
+                          f"ejected: {ejected:>4} stars | "
+                          f"ejection rate: {ejection_percent:>5.1f}%")
+
+
 
             if target_center is not None:
                 if galaxy_center is None:
@@ -115,6 +152,8 @@ def main():
                 else:
                     galaxy_center += (target_center - galaxy_center) * LERP_SPEED
                 scene.center = galaxy_center
-
+        
+        tracker.record_step(step=track_step,galaxy_center=galaxy_center)
+        
 if __name__ == '__main__':
     main()

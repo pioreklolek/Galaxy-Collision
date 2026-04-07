@@ -7,6 +7,8 @@ class Star(object):
         self.mass = mass
         self.vel = vel
         self._pos = pos
+        self.is_merged = False
+        self.is_earth_analog = False
 
     # Externally use scaled version for physics, use normalized version for graphics
     @property
