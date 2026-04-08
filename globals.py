@@ -46,13 +46,11 @@ TRACK_EARTH_IN_MILKY_WAY = True
 TRACK_EARTH_IN_ANDROMEDA = False
 
 EARTH_COLOR = vector(0,1,0)
-
-
 TURN_ON_LOGS = True
 
 # Graphical constants
 STAR_RADIUS = 0.025
-dt = 1e17
+dt = 1e16 # 1e16 or 1e17
 
 
 # FUNCTIONS
@@ -69,9 +67,8 @@ def gravity(mass1, mass2, radius):
 
 # Return the acceleration due to gravity on an object.
 def g_accel(mass, radius):
-    # Limit minimum radius to avoid flinging out too many particles
-    radius = max(radius, MIN_ORBITAL_RADIUS)
-    return G * mass / radius / radius
+    eps = MIN_ORBITAL_RADIUS
+    return G * mass / (radius**2 + eps**2)
 
 
 # Calculate acceleration on an object caused by galaxy
