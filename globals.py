@@ -48,6 +48,10 @@ TRACK_EARTH_IN_ANDROMEDA = False
 EARTH_COLOR = vector(0,1,0)
 TURN_ON_LOGS = True
 
+TRACK_INTERVAL = 50
+LERP_SPEED = 0.05
+
+
 # Graphical constants
 STAR_RADIUS = 0.025
 dt = 1e16 # 1e16 or 1e17

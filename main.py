@@ -6,40 +6,6 @@ from tracker import StarTracker
 import numpy as np
 
 
-def find_galaxy_centroid(stars, sample_radius_scene=5.0):
-    if len(stars) == 0:
-        return None, 0, sample_radius_scene
-
-    positions = np.array([[s.pos.x / DIST_SCALE,
-                           s.pos.y / DIST_SCALE,
-                           s.pos.z / DIST_SCALE] for s in stars])
-
-    r2 = sample_radius_scene ** 2
-    neighbor_counts = np.zeros(len(stars), dtype=int)
-    for i in range(len(positions)):
-        diffs = positions - positions[i]
-        dist2 = (diffs ** 2).sum(axis=1)
-        neighbor_counts[i] = np.sum(dist2 < r2)
-
-    seed_idx = np.argmax(neighbor_counts)
-    seed_pos = positions[seed_idx]
-
-    diffs = positions - seed_pos
-    dist2 = (diffs ** 2).sum(axis=1)
-    cluster_positions = positions[dist2 < r2]
-    centroid = cluster_positions.mean(axis=0)
-
-    spreads = np.sqrt(((cluster_positions - centroid) ** 2).sum(axis=1))
-    next_radius = float(np.clip(spreads.mean() * 2.5, 3.0, 30.0))
-
-    return vector(centroid[0], centroid[1], centroid[2]), len(cluster_positions), next_radius
-
-def calc_ejection_rate(total_stars, stars_in_cluster):
-    #return % of stars ejected in collision
-    if total_stars == 0:
-        return 0
-    return (total_stars - stars_in_cluster) / total_stars * 100.0
-
 def main():
     scene.objects.clear()
 
@@ -79,13 +45,6 @@ def main():
 
     collision_happened = False
     track_step = 0
-    TRACK_INTERVAL = 50
-    cluster_radius = 5.0
-    galaxy_center = None
-
-    target_center = None
-    LERP_SPEED = 0.05
-
     
     while True:
         rate(100)
@@ -139,39 +98,12 @@ def main():
         
         if collision_happened:
             track_step += 1
+            merged = [s for s in milky_way.stars if s.is_merged]
+            merged += [s for s in andromeda.stars if s.is_merged]
 
-            if track_step % TRACK_INTERVAL == 0:
-                merged = [s for s in milky_way.stars
-                          if s.is_merged]
-                merged += [s for s in andromeda.stars
-                           if s.is_merged]
-
-                centroid, cluster_count, cluster_radius = find_galaxy_centroid(
-                    merged, sample_radius_scene=cluster_radius
-                )
-                if centroid is not None:
-                    target_center = centroid
-
-                #logs 
-                ejection_percent = calc_ejection_rate(len(merged), cluster_count)
-
-                if TURN_ON_LOGS:
-                    ejected = len(merged) - cluster_count
-                    print(f"[step {track_step:>6}] "
-                          f"cluster: {cluster_count:>4} stars | "
-                          f"ejected: {ejected:>4} stars | "
-                          f"ejection rate: {ejection_percent:>5.1f}%")
-
-
-
-            if target_center is not None:
-                if galaxy_center is None:
-                    galaxy_center = target_center
-                else:
-                    galaxy_center += (target_center - galaxy_center) * LERP_SPEED
-                scene.center = galaxy_center
-        
-        tracker.record_step(step=track_step,galaxy_center=galaxy_center)
+            camera_center = tracker.record_step(step=track_step, merged_stars=merged)
+            if camera_center is not None:
+                scene.center = camera_center
         
 if __name__ == '__main__':
     main()
