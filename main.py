@@ -1,5 +1,6 @@
 from __future__ import division
 import random
+import pickle
 from globals import *
 from galaxy import Galaxy
 from tracker import StarTracker
@@ -42,10 +43,21 @@ def main():
         earth_radius=EARTH_ORBITAL_RADIUS,
         earth_band=EARTH_ORBITAL_BAND
     )
+    #recording 
+    recording = RECORD_MODE
+    
+    frames = []
+    camera_centres = []
+
+    def snapshot(all_stars):
+        return [(s.obj.pos.x, s.obj.pos.y, s.obj.pos.z,
+                 s.obj.color.x, s.obj.color.y, s.obj.color.z)
+                for s in all_stars]
+
+    all_stars = list(milky_way.stars) + list(andromeda.stars)
 
     collision_happened = False
     track_step = 0
-    
     while True:
         rate(100)
 
@@ -95,15 +107,34 @@ def main():
         a_and = accel(andromeda, milky_way)
         milky_way.vel += 0.5 * a_mw * dt
         andromeda.vel += 0.5 * a_and * dt
+
         
         if collision_happened:
             track_step += 1
+            if track_step >= 15000:
+                print(f"Simulation ended after {track_step} post-collision steps.")
+                break
+                
+            
             merged = [s for s in milky_way.stars if s.is_merged]
             merged += [s for s in andromeda.stars if s.is_merged]
 
             camera_center = tracker.record_step(step=track_step, merged_stars=merged)
             if camera_center is not None:
                 scene.center = camera_center
+
+            if recording and track_step % TRACK_INTERVAL == 0:
+                frames.append(snapshot(all_stars))
+                camera_centres.append((scene.center.x, scene.center.y, scene.center.z))
+
+    if recording:
+        with open("simulation.pkl", "wb") as f:
+            pickle.dump({
+                "num_mw": len(milky_way.stars),
+                "frames": frames,
+                "camera_centers": camera_centres
+            }, f)
+        print(f"Saved {len(frames)} frames to simulation.pkl")
         
 if __name__ == '__main__':
     main()

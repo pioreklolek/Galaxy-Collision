@@ -1,8 +1,10 @@
 from vpython import vector, color, sqrt, sphere, rate, scene
 from math import fsum
 import numpy as np
-# CONSTANTS
 
+RECORD_MODE = True
+
+# CONSTANTS
 RANDOM_SEED = 9999
 
 # Universal gravitational constant
