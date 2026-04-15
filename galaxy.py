@@ -3,10 +3,11 @@ from star import Star
 
 
 class Galaxy(object):
-    def __init__(self, num_stars, pos, vel, radius, thickness, color,rng):
+    def __init__(self, num_stars, pos, vel, radius, thickness, color,rng, label=""):
         self.pos = pos
         self.vel = vel
         self.radius = radius
+        self.label = label
 
         # Gaussian distributions
         sigma_mass = AVG_SOLAR_MASS / 3.0
@@ -51,12 +52,15 @@ class Galaxy(object):
                 calc_orbital_velocity(self.mass, relative_pos.mag)
             absolute_vel = relative_vel + vel
 
-            stars.append(Star(
+            star = Star(
                 mass=masses[i],
                 radius=STAR_RADIUS,
                 pos=absolute_pos,
                 vel=absolute_vel,
                 color=color
-            ))
+            )
+            star.home_galaxy_label = label
+            star.initial_orbital_radius = positions[i].mag  
+            stars.append(star)
 
         self.stars = np.array(stars)

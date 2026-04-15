@@ -4,7 +4,7 @@ from vpython import sphere, vector, rate, scene
 STAR_RADIUS = 0.025
 scene.width = 1300
 scene.height = 650
-REPLAY_SPEED = 5 # lower slower
+REPLAY_SPEED = 5 # lower = slower
 
 with open("simulation.pkl", "rb") as f:
     data = pickle.load(f)

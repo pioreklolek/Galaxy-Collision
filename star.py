@@ -9,6 +9,8 @@ class Star(object):
         self._pos = pos
         self.is_merged = False
         self.is_earth_analog = False
+        self.home_galaxy_label = ""
+        self.initial_orbital_radius = 0.0
 
     # Externally use scaled version for physics, use normalized version for graphics
     @property

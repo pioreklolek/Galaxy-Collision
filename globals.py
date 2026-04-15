@@ -1,8 +1,14 @@
 from vpython import vector, color, sqrt, sphere, rate, scene
 from math import fsum
 import numpy as np
+from numpy import sum as numpy_sum
 
 RECORD_MODE = True
+CSV_RECORD_MODE = True
+SIM_ID = "sim_1"
+SIM_DESCRIPTION = "deafault simulation"
+CSV_TRACK_INTERVAL = 50
+
 
 # CONSTANTS
 RANDOM_SEED = 9999
@@ -24,6 +30,8 @@ AVG_SOLAR_MASS = SOLAR_MASS * 3.0
 
 # Scale distances for galactic scales
 DIST_SCALE = 1e20  # 1e20
+
+CSV_DENSITY_RADIUS = DIST_SCALE * 1.5
 
 # Galactic parameters
 MAX_ORBITAL_RADIUS = DIST_SCALE * 15

@@ -4,6 +4,7 @@ import pickle
 from globals import *
 from galaxy import Galaxy
 from tracker import StarTracker
+from csv_recorder import CsvRecorder
 import numpy as np
 
 
@@ -20,7 +21,8 @@ def main():
         radius=MAX_ORBITAL_RADIUS,
         thickness=MILKY_WAY_GALAXY_THICKNESS,
         color=vector(0.9, 0.9, 1),
-        rng=rng
+        rng=rng,
+        label="milky_way"
     )
     andromeda = Galaxy(
         num_stars=NUM_STARS_ANDROMEDA,
@@ -29,7 +31,8 @@ def main():
         radius=MAX_ORBITAL_RADIUS,
         thickness=ANDROMEDA_GALAXY_THICKNESS,
         color=vector(0, 0.5, 1),
-        rng=rng
+        rng=rng,
+        label="andromeda"
     )
 
     galaxies_to_track = []
@@ -43,6 +46,15 @@ def main():
         earth_radius=EARTH_ORBITAL_RADIUS,
         earth_band=EARTH_ORBITAL_BAND
     )
+
+    recorder = CsvRecorder(
+        sim_id=SIM_ID,
+        description=SIM_DESCRIPTION,
+        milky_way=milky_way,
+        andromeda=andromeda
+    )
+
+
     #recording 
     recording = RECORD_MODE
     
@@ -62,8 +74,10 @@ def main():
         rate(100)
 
         galaxy_separation = (andromeda.pos - milky_way.pos).mag
+
         if not collision_happened and galaxy_separation < COLLISION_THRESHOLD:
             collision_happened = True
+            recorder.set_phase("collision")
 
             for star in milky_way.stars:
                 if not star.is_earth_analog:
@@ -111,6 +125,10 @@ def main():
         
         if collision_happened:
             track_step += 1
+            
+            if track_step > 1:
+                recorder.set_phase("post")
+
             if track_step >= 15000:
                 print(f"Simulation ended after {track_step} post-collision steps.")
                 break
@@ -123,9 +141,19 @@ def main():
             if camera_center is not None:
                 scene.center = camera_center
 
+            if CSV_RECORD_MODE:
+                recorder.record_step(
+                    step=track_step,
+                    earth_analogs=tracker.earth_analogs,
+                    all_stars=all_stars
+                )
+     
             if recording and track_step % TRACK_INTERVAL == 0:
                 frames.append(snapshot(all_stars))
                 camera_centres.append((scene.center.x, scene.center.y, scene.center.z))
+
+    if CSV_RECORD_MODE:
+        recorder.close()
 
     if recording:
         with open("simulation.pkl", "wb") as f:
