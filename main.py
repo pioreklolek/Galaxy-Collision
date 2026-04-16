@@ -5,6 +5,7 @@ from globals import *
 from galaxy import Galaxy
 from tracker import StarTracker
 from csv_recorder import CsvRecorder
+from gravity_calc import Gravity_calc
 import numpy as np
 
 
@@ -88,39 +89,8 @@ def main():
                     star.obj.color = vector(1, 0.5, 0)
                 star.is_merged = True
 
-        #leapfrog gravity algorithm
-        # half - kick
-        for star in milky_way.stars:
-            a = accel(star,milky_way) + accel(star, andromeda)
-            star.vel += 0.5 * a * dt
-        for star in andromeda.stars:
-            a = accel(star,milky_way) + accel(star, andromeda)
-            star.vel += 0.5 * a * dt
-        a_mw = accel(milky_way,andromeda)
-        a_and = accel(andromeda,milky_way)
-        milky_way.vel += 0.5 * a_mw * dt
-        andromeda.vel += 0.5 * a_and * dt
-
-        #drift 
-        for star in milky_way.stars:
-            star.pos += star.vel * dt
-        for star in andromeda.stars:
-            star.pos += star.vel * dt
-        milky_way.pos += milky_way.vel * dt
-        andromeda.pos += andromeda.vel * dt
-
-        #half kick 
-        for star in milky_way.stars:
-            a = accel(star,milky_way) + accel(star,andromeda)
-            star.vel += 0.5 * a * dt
-        for star in andromeda.stars:
-            a = accel(star,milky_way) + accel(star,andromeda)
-            star.vel += 0.5 * a * dt
-
-        a_mw = accel(milky_way, andromeda)
-        a_and = accel(andromeda, milky_way)
-        milky_way.vel += 0.5 * a_mw * dt
-        andromeda.vel += 0.5 * a_and * dt
+        
+        Gravity_calc.step_leapfrog(milky_way,andromeda,dt)
 
         
         if collision_happened:
