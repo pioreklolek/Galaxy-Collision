@@ -5,10 +5,13 @@ from numpy import sum as numpy_sum
 
 RECORD_MODE = True
 CSV_RECORD_MODE = True
-SIM_ID = "sim_1"
+SIM_ID = "sim_4"
 SIM_DESCRIPTION = "deafault simulation"
 CSV_TRACK_INTERVAL = 50
 
+INTEGRATOR = "euler"
+
+MAX_DT_STEP = 20000
 
 # CONSTANTS
 RANDOM_SEED = 9999
@@ -64,7 +67,7 @@ LERP_SPEED = 0.05
 
 # Graphical constants
 STAR_RADIUS = 0.025
-dt = 1e16 # 1e16 or 1e17
+dt = 1e17 # 1e16 or 1e17
 
 
 # FUNCTIONS

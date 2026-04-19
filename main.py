@@ -90,7 +90,8 @@ def main():
                 star.is_merged = True
 
         
-        Gravity_calc.step_leapfrog(milky_way,andromeda,dt)
+        #Gravity_calc.step_leapfrog(milky_way,andromeda,dt)
+        Gravity_calc.step_euler(milky_way,andromeda,dt)
 
         
         if collision_happened:
@@ -99,7 +100,7 @@ def main():
             if track_step > 1:
                 recorder.set_phase("post")
 
-            if track_step >= 15000:
+            if track_step >= MAX_DT_STEP:
                 print(f"Simulation ended after {track_step} post-collision steps.")
                 break
                 
@@ -107,7 +108,9 @@ def main():
             merged = [s for s in milky_way.stars if s.is_merged]
             merged += [s for s in andromeda.stars if s.is_merged]
 
-            camera_center = tracker.record_step(step=track_step, merged_stars=merged)
+            camera_center, cluster_stats = tracker.record_step(  
+                step=track_step, merged_stars=merged
+            )
             if camera_center is not None:
                 scene.center = camera_center
 
@@ -117,7 +120,10 @@ def main():
                     earth_analogs=tracker.earth_analogs,
                     all_stars=all_stars
                 )
-     
+                recorder.record_cluster_step(                      # new 
+                    step=track_step,
+                    stats=cluster_stats
+                )
             if recording and track_step % TRACK_INTERVAL == 0:
                 frames.append(snapshot(all_stars))
                 camera_centres.append((scene.center.x, scene.center.y, scene.center.z))

@@ -77,15 +77,16 @@ class StarTracker:
         return (total_stars - count1 - count2) / total_stars * 100.0
 
 
-    def record_step(self,step,merged_stars):
+
+    def record_step(self, step, merged_stars):
         if step % TRACK_INTERVAL != 0:
+            # ... existing lerp code ...
             if self._target_center is not None:
                 if self._galaxy_center is None:
                     self._galaxy_center = self._target_center
                 else:
                     self._galaxy_center += (self._target_center - self._galaxy_center) * LERP_SPEED
-            
-            return self._galaxy_center
+            return self._galaxy_center, None   # <-- added None
 
         c1, count1, c2, count2, self._cluster_radius = self._find_two_centroids(
             merged_stars, self._cluster_radius
@@ -94,10 +95,11 @@ class StarTracker:
             largest = c1 if (c2 is None or count1 >= count2) else c2
             self._target_center = largest
 
+        total = len(merged_stars)
+        ejected = total - count1 - count2
+        ejection_rate = self._calc_ejection_rate(total, count1, count2)
+
         if TURN_ON_LOGS:
-            total = len(merged_stars)
-            ejected = total - count1 - count2
-            ejection_rate = self._calc_ejection_rate(total, count1, count2)
             print(f"[step {step:>6}] "
                   f"cluster1: {count1:>4} | cluster2: {count2:>4} | "
                   f"ejected: {ejected:>4} | ejection rate: {ejection_rate:>5.1f}%")
@@ -108,7 +110,14 @@ class StarTracker:
             else:
                 self._galaxy_center += (self._target_center - self._galaxy_center) * LERP_SPEED
 
-        return self._galaxy_center
+        cluster_stats = {                      # <-- new
+            "count1": count1,
+            "count2": count2,
+            "ejected": ejected,
+            "ejection_rate": ejection_rate,
+            "total": total,
+        }
+        return self._galaxy_center, cluster_stats   # <-- added stats
 
     def save_to_file(self,filepath,sim_params):
         pass
