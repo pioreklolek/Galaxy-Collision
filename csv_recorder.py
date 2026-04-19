@@ -43,6 +43,9 @@ CLUSTER_FIELDS = [
     "cluster1", "cluster2",
     "ejected", "total_merged",
     "ejection_rate_pct",
+    "c1_x", "c1_y", "c1_z",      
+    "c2_x", "c2_y", "c2_z",         
+    "cluster_separation",             
     "collision_phase"
 ]
 
@@ -190,7 +193,6 @@ class CsvRecorder:
             })
     
     def record_cluster_step(self, step, stats):
-        """stats dict: count1, count2, ejected, total, ejection_rate"""
         if stats is None:
             return
         self._cluster_writer.writerow({
@@ -201,12 +203,19 @@ class CsvRecorder:
             "ejected":           stats["ejected"],
             "total_merged":      stats["total"],
             "ejection_rate_pct": f"{stats['ejection_rate']:.2f}",
+            "c1_x":              f"{stats['c1_x']:.4e}" if stats["c1_x"] is not None else "",
+            "c1_y":              f"{stats['c1_y']:.4e}" if stats["c1_y"] is not None else "",
+            "c1_z":              f"{stats['c1_z']:.4e}" if stats["c1_z"] is not None else "",
+            "c2_x":              f"{stats['c2_x']:.4e}" if stats["c2_x"] is not None else "",
+            "c2_y":              f"{stats['c2_y']:.4e}" if stats["c2_y"] is not None else "",
+            "c2_z":              f"{stats['c2_z']:.4e}" if stats["c2_z"] is not None else "",
+            "cluster_separation": f"{stats['cluster_separation']:.4e}" if stats["cluster_separation"] is not None else "",
             "collision_phase":   self._phase,
         })
 
     def close(self):
         self._data_file.flush()
         self._data_file.close()
-        self._cluster_file.flush()       # <-- new
-        self._cluster_file.close()       # <-- new
+        self._cluster_file.flush()     
+        self._cluster_file.close()       
         print(f"CsvRecorder: closed — data written to '{DATA_FILE}' and '{CLUSTER_FILE}'")

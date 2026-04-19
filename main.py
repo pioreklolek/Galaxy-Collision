@@ -16,19 +16,19 @@ def main():
     print(rng.gauss(0, 1))
     
     milky_way = Galaxy(
-        num_stars=NUM_STARS_MILKY_WAY,
-        pos=vector(-9, 0, 0) * DIST_SCALE,
-        vel=vector(0, 0, 0),
-        radius=MAX_ORBITAL_RADIUS,
-        thickness=MILKY_WAY_GALAXY_THICKNESS,
-        color=vector(0.9, 0.9, 1),
-        rng=rng,
-        label="milky_way"
-    )
+    num_stars=NUM_STARS_MILKY_WAY,
+    pos=vector(-9, 0, 0) * DIST_SCALE,
+    vel=vector(0, 0, 0),
+    radius=MAX_ORBITAL_RADIUS,
+    thickness=MILKY_WAY_GALAXY_THICKNESS,
+    color=vector(0.9, 0.9, 1),
+    rng=rng,
+    label="milky_way"
+)
     andromeda = Galaxy(
         num_stars=NUM_STARS_ANDROMEDA,
-        pos=vector(6, 0, 0) * DIST_SCALE,
-        vel=vector(0, 3, 0),
+        pos=vector(6, 3, 0) * DIST_SCALE, 
+        vel=vector(0, 0, 0),
         radius=MAX_ORBITAL_RADIUS,
         thickness=ANDROMEDA_GALAXY_THICKNESS,
         color=vector(0, 0.5, 1),
@@ -90,8 +90,8 @@ def main():
                 star.is_merged = True
 
         
-        #Gravity_calc.step_leapfrog(milky_way,andromeda,dt)
-        Gravity_calc.step_euler(milky_way,andromeda,dt)
+        Gravity_calc.step_leapfrog(milky_way,andromeda,dt)
+        #Gravity_calc.step_euler(milky_way,andromeda,dt)
 
         
         if collision_happened:

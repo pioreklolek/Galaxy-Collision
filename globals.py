@@ -5,11 +5,11 @@ from numpy import sum as numpy_sum
 
 RECORD_MODE = True
 CSV_RECORD_MODE = True
-SIM_ID = "sim_4"
-SIM_DESCRIPTION = "deafault simulation"
+SIM_ID = "sim_6"
+SIM_DESCRIPTION = "offset collision b=3, tidal tails expected"
 CSV_TRACK_INTERVAL = 50
 
-INTEGRATOR = "euler"
+INTEGRATOR = "leapfrog"
 
 MAX_DT_STEP = 20000
 
@@ -67,7 +67,7 @@ LERP_SPEED = 0.05
 
 # Graphical constants
 STAR_RADIUS = 0.025
-dt = 1e17 # 1e16 or 1e17
+dt = 1e16 # 1e16 or 1e17
 
 
 # FUNCTIONS
@@ -82,11 +82,16 @@ def gravity(mass1, mass2, radius):
     return G * mass1 * mass2 / radius**2
 
 
-# Return the acceleration due to gravity on an object.
+ # Return the acceleration due to gravity on an object.
 def g_accel(mass, radius):
     eps = MIN_ORBITAL_RADIUS
     return G * mass / (radius**2 + eps**2)
 
+
+# # old g-accel
+# def g_accel(mass, radius):
+#     radius = max(radius, MIN_ORBITAL_RADIUS)
+#     return G * mass / radius / radius
 
 # Calculate acceleration on an object caused by galaxy
 def accel(obj, galaxy):

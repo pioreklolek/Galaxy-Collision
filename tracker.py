@@ -110,13 +110,20 @@ class StarTracker:
             else:
                 self._galaxy_center += (self._target_center - self._galaxy_center) * LERP_SPEED
 
-        cluster_stats = {                      # <-- new
-            "count1": count1,
-            "count2": count2,
-            "ejected": ejected,
-            "ejection_rate": ejection_rate,
-            "total": total,
-        }
+        cluster_stats = {
+        "count1": count1,
+        "count2": count2,
+        "ejected": ejected,
+        "ejection_rate": ejection_rate,
+        "total": total,
+        "c1_x": c1.x if c1 is not None else None,   # nowe
+        "c1_y": c1.y if c1 is not None else None,   # nowe
+        "c1_z": c1.z if c1 is not None else None,   # nowe
+        "c2_x": c2.x if c2 is not None else None,   # nowe
+        "c2_y": c2.y if c2 is not None else None,   # nowe
+        "c2_z": c2.z if c2 is not None else None,   # nowe
+        "cluster_separation": (c1 - c2).mag if (c1 is not None and c2 is not None) else None,  # nowe
+    }
         return self._galaxy_center, cluster_stats   # <-- added stats
 
     def save_to_file(self,filepath,sim_params):
