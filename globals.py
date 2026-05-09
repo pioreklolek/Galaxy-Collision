@@ -5,8 +5,8 @@ from numpy import sum as numpy_sum
 
 RECORD_MODE = True
 CSV_RECORD_MODE = True
-SIM_ID = "sim_6"
-SIM_DESCRIPTION = "offset collision b=3, tidal tails expected"
+SIM_ID = "sim_7"
+SIM_DESCRIPTION = "top-down collision, andromeda falls along Y axis"
 CSV_TRACK_INTERVAL = 50
 
 INTEGRATOR = "leapfrog"

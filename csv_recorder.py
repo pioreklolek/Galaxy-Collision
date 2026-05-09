@@ -32,8 +32,8 @@ DATA_FIELDS = [
     # Environment
     "local_star_density",
     # Binding
-    "specific_energy",          # ujemna = związana, dodatnia = ucieka (zastępuje is_bound)
-    "nearest_galaxy",           # "MW" lub "AND" — do której galaktyki liczymy energię
+    "specific_energy",          # ujemna = związana, dodatnia = ucieka 
+    "nearest_galaxy",           # mw lub and
     # Phase
     "collision_phase"
 ]
