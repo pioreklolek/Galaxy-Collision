@@ -1,12 +1,12 @@
 from __future__ import division
 import random
 import pickle
-from globals import *
-from galaxy import Galaxy
-from tracker import StarTracker
-from csv_recorder import CsvRecorder
-from gravity_calc import Gravity_calc
-from density_grid import DensityGrid, DENSITY_INTERVAL
+from app.globals import *
+from app.galaxy import Galaxy
+from app.tracker import StarTracker
+from app.csv_recorder import CsvRecorder
+from app.gravity_calc import Gravity_calc
+from app.density_grid import DensityGrid, DENSITY_INTERVAL
 import numpy as np
 
 

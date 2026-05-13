@@ -2,7 +2,7 @@ import csv
 import os
 import math
 import numpy as np
-from globals import *
+from app.globals import *
 
 META_FILE = "sim_meta.csv"
 DATA_FILE = "sim_data.csv"
@@ -10,7 +10,7 @@ CLUSTER_FILE = "sim_cluster.csv"
 
 META_FIELDS = [
     "sim_id", "description",
-    "integrator",
+    "integrator", "dark_matter_factor",
     "random_seed", "num_stars_mw", "num_stars_andromeda",
     "dt", "earth_orbital_radius", "earth_orbital_band",
     "max_earth_analogs", "track_mw", "track_andromeda",
@@ -173,6 +173,7 @@ class CsvRecorder:
                 "sim_id":               self._sim_id,
                 "description":          description,
                 "integrator":           self._integrator,
+                "dark_matter_factor":   DARK_MATTER_FACTOR,
                 "random_seed":          RANDOM_SEED,
                 "num_stars_mw":         NUM_STARS_MILKY_WAY,
                 "num_stars_andromeda":  NUM_STARS_ANDROMEDA,

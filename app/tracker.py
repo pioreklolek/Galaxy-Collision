@@ -1,4 +1,4 @@
-from globals import *
+from app.globals import *
 import numpy as np
 import random
 

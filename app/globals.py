@@ -69,6 +69,8 @@ LERP_SPEED = 0.05
 STAR_RADIUS = 0.025
 dt = 1e16 # 1e16 or 1e17
 
+# Ratio of dark matter to  matter (stars)
+DARK_MATTER_FACTOR = 0 # 0 = no dark matter , 5.0 = realistic value 
 
 # FUNCTIONS
 

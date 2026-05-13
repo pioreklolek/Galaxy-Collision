@@ -1,4 +1,4 @@
-from globals import *
+from app.globals import *
 
 
 class Star(object):

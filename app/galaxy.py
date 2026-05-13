@@ -1,5 +1,5 @@
-from globals import *
-from star import Star
+from app.globals import *
+from app.star import Star
 
 
 class Galaxy(object):
@@ -15,7 +15,10 @@ class Galaxy(object):
                   for i in range(num_stars)]
 
         # Galaxy mass is sum of all stars
-        self.mass = fsum(masses)
+        self.mass_without_dark_matter = fsum(masses)
+
+        #dark matter 
+        self.mass = self.mass_without_dark_matter * (1.0 + DARK_MATTER_FACTOR)
 
         # Gaussian distribution of positions
         sigma_x = radius * 0.1
