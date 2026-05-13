@@ -6,6 +6,7 @@ from galaxy import Galaxy
 from tracker import StarTracker
 from csv_recorder import CsvRecorder
 from gravity_calc import Gravity_calc
+from density_grid import DensityGrid, DENSITY_INTERVAL
 import numpy as np
 
 
@@ -55,6 +56,10 @@ def main():
         andromeda=andromeda
     )
 
+    density_grid = DensityGrid(
+    sim_id=SIM_ID,
+    max_orbital_radius=MAX_ORBITAL_RADIUS,
+)
 
     #recording 
     recording = RECORD_MODE
@@ -114,6 +119,40 @@ def main():
             if camera_center is not None:
                 scene.center = camera_center
 
+            #liczenie zmian gestosci:
+
+            if track_step % DENSITY_INTERVAL == 0:
+ 
+            # Wybierz centra: c1/c2 ze StarTrackera jeśli są dostępne,
+            # w przeciwnym razie użyj pozycji galaktyk.
+                density_centres = {}
+        
+                if (cluster_stats is not None
+                        and cluster_stats.get("c1_x") is not None
+                        and cluster_stats.get("c2_x") is not None):
+                    # po kolizji — centra klastrów ze StarTrackera
+                    density_centres["cluster1"] = vector(
+                        cluster_stats["c1_x"],
+                        cluster_stats["c1_y"],
+                        cluster_stats["c1_z"],
+                    )
+                    density_centres["cluster2"] = vector(
+                        cluster_stats["c2_x"],
+                        cluster_stats["c2_y"],
+                        cluster_stats["c2_z"],
+                    )
+                else:
+                    # przed / tuż po kolizji — pozycje galaktyk
+                    density_centres["milky_way"] = milky_way.pos
+                    density_centres["andromeda"] = andromeda.pos
+        
+                density_grid.record_step(
+                    step=track_step,
+                    centres=density_centres,
+                    all_stars=all_stars,
+                    phase=recorder._phase,      # synchronizuj fazę z CsvRecorder
+                )
+ 
             if CSV_RECORD_MODE:
                 recorder.record_step(
                     step=track_step,
@@ -130,6 +169,7 @@ def main():
 
     if CSV_RECORD_MODE:
         recorder.close()
+    density_grid.close()
 
     if recording:
         with open("simulation.pkl", "wb") as f:
