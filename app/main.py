@@ -21,18 +21,19 @@ def main():
     
     milky_way = Galaxy(
     num_stars=NUM_STARS_MILKY_WAY,
-    pos=vector(0, -9, 0) * DIST_SCALE, 
-    vel=vector(0, 3, 0),               
+    pos=vector(-5, 0, 0) * DIST_SCALE, 
+    vel=vector(0, 0, 0),               
     radius=MAX_ORBITAL_RADIUS,
     thickness=MILKY_WAY_GALAXY_THICKNESS,
     color=vector(0.9, 0.9, 1),
     rng=rng,
     label="milky_way"
     )
+
     andromeda = Galaxy(
         num_stars=NUM_STARS_ANDROMEDA,
-        pos=vector(0, 6, 0) * DIST_SCALE,  
-        vel=vector(0, -3, 0),               
+        pos=vector(3, 0, 0) * DIST_SCALE,  
+        vel=vector(0, 3, 0),               
         radius=MAX_ORBITAL_RADIUS,
         thickness=ANDROMEDA_GALAXY_THICKNESS,
         color=vector(0, 0.5, 1),
@@ -92,8 +93,13 @@ def main():
     track_step = 0
     final_hab_scanned = False
 
+    last_density_centres = {
+    "milky_way": milky_way.pos,
+    "andromeda": andromeda.pos,
+}
+
     while True:
-        rate(100)
+        rate(100) #100 lub 1000
 
         galaxy_separation = (andromeda.pos - milky_way.pos).mag
 
@@ -111,8 +117,8 @@ def main():
                 star.is_merged = True
 
         
-        Gravity_calc.step_leapfrog(milky_way,andromeda,dt)
-        #Gravity_calc.step_euler(milky_way,andromeda,dt)
+        #Gravity_calc.step_leapfrog(milky_way,andromeda,dt)
+        Gravity_calc.step_euler(milky_way,andromeda,dt)
 
         
         if collision_happened:
@@ -141,38 +147,38 @@ def main():
             if camera_center is not None:
                 scene.center = camera_center
 
-            #liczenie zmian gestosci:
 
+            #liczenie zmian gestosci:
             if track_step % DENSITY_INTERVAL == 0:
- 
-            # Wybierz centra: c1/c2 ze StarTrackera jeśli są dostępne,
-            # w przeciwnym razie użyj pozycji galaktyk.
-                density_centres = {}
-        
+
                 if (cluster_stats is not None
                         and cluster_stats.get("c1_x") is not None
                         and cluster_stats.get("c2_x") is not None):
-                    # po kolizji — centra klastrów ze StarTrackera
-                    density_centres["cluster1"] = vector(
-                        cluster_stats["c1_x"],
-                        cluster_stats["c1_y"],
-                        cluster_stats["c1_z"],
-                    )
-                    density_centres["cluster2"] = vector(
-                        cluster_stats["c2_x"],
-                        cluster_stats["c2_y"],
-                        cluster_stats["c2_z"],
-                    )
-                else:
-                    # przed / tuż po kolizji — pozycje galaktyk
-                    density_centres["milky_way"] = milky_way.pos
-                    density_centres["andromeda"] = andromeda.pos
-        
-                density_grid.record_step(
+                    # post-kolizja  
+                    last_density_centres = {
+                        "cluster1": vector(
+                            cluster_stats["c1_x"] * DIST_SCALE,
+                            cluster_stats["c1_y"] * DIST_SCALE,
+                            cluster_stats["c1_z"] * DIST_SCALE,
+                        ),
+                        "cluster2": vector(
+                            cluster_stats["c2_x"] * DIST_SCALE,
+                            cluster_stats["c2_y"] * DIST_SCALE,
+                            cluster_stats["c2_z"] * DIST_SCALE,
+                        ),
+                    }
+                elif not collision_happened:
+                    # pre-kolizja galaktyki na swoich pozycjach
+                    last_density_centres = {
+                        "milky_way": milky_way.pos,
+                        "andromeda": andromeda.pos,
+                    }
+
+                density_grid.record_step(         
                     step=track_step,
-                    centres=density_centres,
+                    centres=last_density_centres, 
                     all_stars=all_stars,
-                    phase=recorder._phase,      # synchronizuj fazę z CsvRecorder
+                    phase=recorder._phase,
                 )
  
             if CSV_RECORD_MODE:

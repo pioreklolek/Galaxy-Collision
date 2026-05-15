@@ -5,11 +5,11 @@ from numpy import sum as numpy_sum
 
 RECORD_MODE = True
 CSV_RECORD_MODE = True
-SIM_ID = "sim_7"
-SIM_DESCRIPTION = "top-down collision, andromeda falls along Y axis"
+SIM_ID = "sim_1"
+SIM_DESCRIPTION = "default simulation"
 CSV_TRACK_INTERVAL = 50
 
-INTEGRATOR = "leapfrog"
+INTEGRATOR = "euler"
 
 MAX_DT_STEP = 20000
 
@@ -46,9 +46,9 @@ ANDROMEDA_GALAXY_THICKNESS = DIST_SCALE * 0.5
 COLLISION_THRESHOLD = DIST_SCALE * 5.0
 
 # Milky Way contains about 300 billion stars
-NUM_STARS_MILKY_WAY = 700 #700
+NUM_STARS_MILKY_WAY = 700 #700 lub 1400
 # Andromeda Galaxy contains about 1 trillion (10^12) stars
-NUM_STARS_ANDROMEDA = 1400 #1400
+NUM_STARS_ANDROMEDA = 1400 #1400 lub 2800
 
 #Earth-Like tracking 
 EARTH_ORBITAL_RADIUS = DIST_SCALE * 2.46
@@ -67,7 +67,7 @@ LERP_SPEED = 0.05
 
 # Graphical constants
 STAR_RADIUS = 0.025
-dt = 1e16 # 1e16 or 1e17
+dt = 1e17 # 1e16 or 1e17 (17 default)
 
 # Ratio of dark matter to  matter (stars)
 DARK_MATTER_FACTOR = 0 # 0 = no dark matter , 5.0 = realistic value 
@@ -84,17 +84,28 @@ def gravity(mass1, mass2, radius):
     return G * mass1 * mass2 / radius**2
 
 
- # Return the acceleration due to gravity on an object.
-def g_accel(mass, radius):
+# Return the acceleration due to gravity on an object. 
+#G_ACCEL MODE
+#clamp - stara/orginalna wersja, lepsza dla Eulera
+#softening - nowa wersja, lepsza dla Leapfroga
+G_ACCEL_MODE = "clamp"  #clamp lub softening
+
+def _g_accel_clamp(mass, radius):
+    radius = max(radius, MIN_ORBITAL_RADIUS)
+    return G * mass / radius / radius
+
+def _g_accel_softening(mass, radius):
     eps = MIN_ORBITAL_RADIUS
     return G * mass / (radius**2 + eps**2)
 
-
-# # old g-accel
-# def g_accel(mass, radius):
-#     radius = max(radius, MIN_ORBITAL_RADIUS)
-#     return G * mass / radius / radius
-
+def g_accel(mass, radius):
+    if G_ACCEL_MODE == "clamp":
+        return _g_accel_clamp(mass, radius)
+    elif G_ACCEL_MODE == "softening":
+        return _g_accel_softening(mass, radius)
+    else:
+        raise ValueError(f"Nieznany G_ACCEL_MODE: '{G_ACCEL_MODE}'")
+    
 # Calculate acceleration on an object caused by galaxy
 def accel(obj, galaxy):
     r_galaxy = galaxy.pos - obj.pos

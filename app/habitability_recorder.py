@@ -37,7 +37,7 @@ class HabitabilityRecorder:
             not os.path.exists(HABITABILITY_FILE)
             or os.path.getsize(HABITABILITY_FILE) == 0
         )
-        self._file = open(HABITABILITY_FILE, "a", newline="")
+        self._file = open(HABITABILITY_FILE, "w", newline="")
         self._writer = csv.DictWriter(self._file, fieldnames=HABITABILITY_FIELDS)
         if self._file_is_new:
             self._writer.writeheader()
