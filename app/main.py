@@ -7,7 +7,10 @@ from app.tracker import StarTracker
 from app.csv_recorder import CsvRecorder
 from app.gravity_calc import Gravity_calc
 from app.density_grid import DensityGrid, DENSITY_INTERVAL
+from app.habitability_recorder import HabitabilityRecorder
 import numpy as np
+
+HABITABILITY_FINAL_STEP = 19_900
 
 
 def main():
@@ -60,6 +63,17 @@ def main():
     sim_id=SIM_ID,
     max_orbital_radius=MAX_ORBITAL_RADIUS,
 )
+    
+    galaxies_for_hab = [
+        (milky_way, "milky_way"),
+        (andromeda, "andromeda"),
+    ]
+ 
+    hab_recorder = HabitabilityRecorder(sim_id=SIM_ID)
+ 
+    # SKAN POCZĄTKOWY  habitat 
+    hab_recorder.scan(galaxies_for_hab, step=0, phase="initial")
+
 
     #recording 
     recording = RECORD_MODE
@@ -76,6 +90,8 @@ def main():
 
     collision_happened = False
     track_step = 0
+    final_hab_scanned = False
+
     while True:
         rate(100)
 
@@ -104,6 +120,12 @@ def main():
             
             if track_step > 1:
                 recorder.set_phase("post")
+
+            #wykonaj skan koncowy raz , gdy step dojdzie do HABITABILITY_FINAL_STEP
+            if not final_hab_scanned and track_step >= HABITABILITY_FINAL_STEP:
+                hab_recorder.scan(galaxies_for_hab, step=track_step, phase="final")
+                final_hab_scanned = True
+
 
             if track_step >= MAX_DT_STEP:
                 print(f"Simulation ended after {track_step} post-collision steps.")
@@ -170,6 +192,7 @@ def main():
     if CSV_RECORD_MODE:
         recorder.close()
     density_grid.close()
+    hab_recorder.close()
 
     if recording:
         with open("simulation.pkl", "wb") as f:
